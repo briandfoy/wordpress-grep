@@ -4,9 +4,9 @@ require 5.016;
 
 eval "use Test::Manifest 1.21";
 
-my $main_file = 'lib/Wordpress/Grep.pm';
+my $main_file = 'lib/WordPress/Grep.pm';
 WriteMakefile(
-	'NAME'	        => 'Wordpress::Grep',
+	'NAME'	        => 'WordPress::Grep',
 	'ABSTRACT_FROM' => $main_file,
 	'VERSION_FROM'  => $main_file,
 	'LICENSE'       => 'perl',
@@ -19,6 +19,6 @@ WriteMakefile(
 		'Carp'       => '0',
 		},
 
-	clean  => { FILES    => q|Wordpress-Grep-*| },
+	clean  => { FILES    => q|WordPress-Grep-*| },
 
 	);
