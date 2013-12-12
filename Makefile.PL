@@ -15,6 +15,8 @@ WriteMakefile(
 	'PREREQ_PM'    => { 
 		'Test::More' => '0.95',
 		'DBI'        => '0',
+		'DBD::mysql' => '0',
+		'Carp'       => '0',
 		},
 
 	clean  => { FILES    => q|Wordpress-Grep-*| },
