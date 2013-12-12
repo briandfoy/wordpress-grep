@@ -37,8 +37,12 @@ if( defined $code ) {
 	my $code_ref = sub { no strict 'refs'; &{"$code"}( @_ ); };
 	}
 
-say "User is [$user]";
-my $wpgrep = Wordpress::Grep->connect(
+my $regex_ref;
+if( defined $regex ) {
+	$regex_ref = eval { qr/$regex/ } or die "Regex [$regex] does not compile! $@\n";
+	}
+
+my $wpgrep = WordPress::Grep->connect(
 	defined $host     ? ( host => $host )         : (),
 	defined $port     ? ( port => $port )         : (),
 	defined $user     ? ( user => $user )         : (),
