@@ -23,23 +23,29 @@ WordPress::Grep - Search Wordpress titles and content
 
 	my $wp_grep = WordPress::Grep->connect(
 		# required
-		user =>
-		password =>
-		database =>
+		user     => $user,
+		database => $db,
+
+		# optional
+		password => $pass,
 
 		# has defaults
-		host     =>
-		port     =>
+		host     => 'localhost',
+		port     => '3306',
 		);
-		
-	my @posts = $wp_grep->search(
+
+	my $posts = $wp_grep->search(
 		sql_like        => '....',
 		regex           => qr/ ... /,
 		code            => sub { ... },
-		type            => [ 'post', 'revision', 'page', 'attachment' ],
-		include_columns => [ ],
-		exclude_columns => [ ],
+		include_columns => [ ],  # not implemented
+		exclude_columns => [ ],  # not implemented
 		);
+
+	foreach my $post_id ( keys %$post ) {
+		printf "%4d %s\n",
+			$posts->{$post_id}{ID}, $posts->{$post_id}{post_title};
+		}
 
 =head1 DESCRIPTION
 
