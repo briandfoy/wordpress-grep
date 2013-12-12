@@ -2,6 +2,10 @@ use ExtUtils::MakeMaker;
 
 require 5.016;
 
+print <<"HERE";
+THIS IS ALPHA SOFTWARE. IT MIGHT CHANGE.
+HERE
+
 eval "use Test::Manifest 1.21";
 
 my $main_file = 'lib/WordPress/Grep.pm';
@@ -20,5 +24,4 @@ WriteMakefile(
 		},
 
 	clean  => { FILES    => q|WordPress-Grep-*| },
-
 	);
