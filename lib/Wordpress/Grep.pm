@@ -1,4 +1,4 @@
-package Wordpress::Grep;
+package WordPress::Grep;
 use v5.16;
 use strict;
 use warnings;
@@ -15,13 +15,13 @@ $VERSION = '0.010_001';
 
 =head1 NAME
 
-Wordpress::Grep - Search Wordpress titles and content
+WordPress::Grep - Search Wordpress titles and content
 
 =head1 SYNOPSIS
 
-	use Wordpress::Grep;
+	use WordPress::Grep;
 
-	my $wp_grep = Wordpress::Grep->connect(
+	my $wp_grep = WordPress::Grep->connect(
 		# required
 		user =>
 		password =>

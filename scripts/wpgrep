@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Getopt::Long qw(GetOptions);
-use Wordpress::Grep;
+use WordPress::Grep;
 
 binmode STDOUT, ':utf8';
 
