@@ -1,4 +1,5 @@
-package [% module %];
+# $Id$
+package Wordpress::Grep;
 use strict;
 
 use warnings;
@@ -7,15 +8,15 @@ no warnings;
 use subs qw();
 use vars qw($VERSION);
 
-$VERSION = '0.10_01';
+$VERSION = '0.11';
 
 =head1 NAME
 
-[% module %] - This is the description
+Wordpress::Grep - This is the description
 
 =head1 SYNOPSIS
 
-	use [% module %];
+	use Wordpress::Grep;
 
 =head1 DESCRIPTION
 
@@ -52,7 +53,9 @@ sub init
 
 =head1 SOURCE AVAILABILITY
 
-This source is in Github
+This source is in a Git repository that I haven't made public
+because I haven't bothered to set it up. If you want to clone
+it, just ask and we'll work something out.
 
 =head1 AUTHOR
 

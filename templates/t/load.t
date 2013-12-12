@@ -1,3 +1,4 @@
+# $Id: load.t,v 1.2 2004/09/08 00:25:42 comdog Exp $
 BEGIN {
 	@classes = qw(Wordpress::Grep);
 	}
