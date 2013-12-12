@@ -8,24 +8,24 @@ use WordPress::Grep;
 
 binmode STDOUT, ':utf8';
 
-my( 
+my(
 	$code, $database, $host, $like, $password, $port, $regex, $user,
 	) = ();
 
 GetOptions (
-	"c|code"            => \$code,
+	"c|code=s"          => \$code,
 	"d|db|database=s"   => \$database,
 	"h|host=s"          => \$host,
-	"l|like"            => \$like,
+	"l|like=s"          => \$like,
 	"p|password=s"      => \$password,
 	"port=i"            => \$port,
-	"r|regex"           => \$regex,
+	"r|regex=s"         => \$regex,
 	"u|user=s"          => \$user,
 	);
 
 if( defined $code ) {
 	my( $package, $subroutine ) = $code =~ m/(.*)::(.*)/;
-	die "Illegal package name [$package]\n" 
+	die "Illegal package name [$package]\n"
 		unless $package =~ /\A([A-Z0-9_]+::)[A-Z0-9_]+\z/;
 	unless( eval "require $package; 1" ) {
 		die "Could not load package [$package]: $@\n";
@@ -33,7 +33,7 @@ if( defined $code ) {
 	unless( eval { $package->can( $subroutine ) } ) {
 		die "Package [$package] does not implement [$subroutine]\n";
 		}
-		
+
 	my $code_ref = sub { no strict 'refs'; &{"$code"}( @_ ); };
 	}
 
@@ -49,12 +49,14 @@ my $wpgrep = WordPress::Grep->connect(
 	defined $database ? ( database => $database ) : (),
 	defined $password ? ( password => $password ) : (),
 	);
-	
+
 my $posts = $wpgrep->search(
-	defined $like  ? ( sql_like => $like ) : (),
-	defined $regex ? ( regex => $regex )   : (),
-	defined $code  ? ( code => $code )     : (),
+	defined $like  ? ( sql_like => $like )   : (),
+	defined $regex ? ( regex => $regex_ref ) : (),
+	defined $code  ? ( code => $code )       : (),
 	);
+
+# eventually this will pop up some other form
 say "There are " . keys( %$posts ) . " posts";
 say "-" x 50 if keys( %$posts );
 foreach my $ID ( sort { $a <=> $b } keys %$posts ) {
