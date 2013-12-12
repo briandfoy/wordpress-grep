@@ -43,22 +43,66 @@ WordPress::Grep - Search Wordpress titles and content
 
 =head1 DESCRIPTION
 
+[This is alpha software.]
 
-* Assumes UTF-8
-* using regex always adds post_content and post_title
+This module allows you to search through the posts in a WordPress
+database by directly examining the C<wp_posts> table. Forget about
+these limited APIs. Use the power of Perl directly on the content.
+
+I've long wanted this tool to examine consistency in my posts. I want
+to check my use of CSS and HTML across all posts to check what I may
+need to change when I change how I do things. This sort of thing is hard
+to do with existing tools and the WordPress API (although there is a
+L<WordPress::API>.
+
+I want to go through all posts with all the power of Perl, so my
+grep:
+
+=over 4
+
+=item 1 Takes an optional LIKE argument that it applies to C<post_title> and C<post_content>.
+
+=item 2 Takes an optional regex argument that it uses to filter the returned rows, keeping only the rows whose titles or content that satisfy the regex.
+
+=item 3 Takes a code argument that it uses to filter the returned rows, keeping only the rows which return true for that subroutine.
+
+=item 4 Returns the matching rows in the same form that C<DBI>'s C<fetchall_hashref> returns. The top-level key is the value in the
+C<ID> column.
+
+=back
+
+Right now, there are some limitations based on my particular use:
+
+=over 4
+
+=item * I assume UTF-8 everywhere, including in the database.
+
+=item * Applying a regex or code filter always return (at least) the C<post_title> and C<post_content>.
+
+=item * The LIKE and regex filters only work on C<post_title> and C<post_content>. The code filter gets the entire row as a hash reference and can do what it likes.
+
+=back
+
+I've set up a slave of the MySQL server that runs my WordPress
+installations. In that slave, I set up a read-only user for this tool.
+
+=head2 Methods
 
 =over 4
 
 =item connect
 
-Connect to the WordPress database. You must specify these parameters, 
-which should be the same ones in your I<wp_config.php> (although if 
+Connect to the WordPress database. You must specify these parameters,
+which should be the same ones in your I<wp_config.php> (although if
 you need this tool frequently, consider setting up a read-only user
 for this, or run it against a slave).
 
 	user
-	password
 	database
+
+If you need a password, you'll have to provide that:
+
+	password
 
 These parameters have defaults
 
@@ -112,13 +156,39 @@ sub _db_utf8 {
 
 =item db
 
-Return the db connection
+Return the db connection. This is a vanilla DBI connection to MySQL.
+If you subclass this, you can do further setup by overriding C<_db_init>.
 
 =cut
 
 sub db { $_[0]->{db} }
 
 =item search
+
+The possible arguments:
+
+	sql_like - a string
+	regex    - a regular expression reference (qr//)
+	code     - a subroutine reference
+
+This method first builds a query to search through the C<wp_posts>
+table.
+
+If you specify C<sql_like>, it limits the returned rows to those whose
+C<post_title> or C<post_content> match that argument.
+
+If you specify C<regex>, it filters the returned rows to those whose
+C<post_title> or C<post_content> satisfy the regular expression.
+
+If you specify C<code>, it filters the returned rows to those for
+which the subroutine reference returns true. The coderef gets a hash
+reference of the current row. It's up to you to decide what to do with
+it.
+
+These filters are consecutive. You can specify any combination of them
+but they always happen in that order. The C<regex> only gets the rows
+that satisfied the C<sql_like>, and the C<code> only gets the rows
+that satisfied C<sql_like> and C<regex>.
 
 =cut
 
@@ -243,6 +313,7 @@ sub _get_posts {
 
 =head1 SEE ALSO
 
+L<WordPress::API>
 
 =head1 SOURCE AVAILABILITY
 
