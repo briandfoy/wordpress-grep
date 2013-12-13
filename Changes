@@ -1,7 +1,10 @@
-0.10_001 - Thu Dec 12 12:52:37 2013
-	* The start of a tool to search a WordPress database
+# Changes for WordPress::Grep
 
 0.10_002 - Fri Dec 13 17:26:27 2013
 	* Filter by categories and tags
 	* Specify an output template
+	* --user now defaults to root
+
+0.10_001 - Thu Dec 12 12:52:37 2013
+	* The start of a tool to search a WordPress database
 
