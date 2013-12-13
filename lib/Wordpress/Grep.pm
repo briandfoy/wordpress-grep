@@ -82,6 +82,8 @@ Right now, there are some limitations based on my particular use:
 
 =over 4
 
+=item * I only select the C<post> types.
+
 =item * I assume UTF-8 everywhere, including in the database.
 
 =item * Applying a regex or code filter always return (at least) the C<post_title> and C<post_content>.
@@ -115,19 +117,21 @@ These parameters have defaults
 
 	host	defaults to localhost
 	port	defaults to 3306
+	user    defaults to root
 
 =cut
 
 sub connect {
 	my( $class, %args ) = @_;
 
-	foreach my $required ( qw(user database) ) {
+	foreach my $required ( qw(database) ) {
 		croak "You must set '$required' in connect()"
 			unless defined $args{$required};
 		}
 
 	$args{host} //= 'localhost';
 	$args{port} //= 3306;
+	$args{user} //= 'root';
 
 	my $dsn = "dbi:mysql:db=$args{database};host=$args{host};port=$args{port}";
 
@@ -178,11 +182,20 @@ The possible arguments:
 	regex    - a regular expression reference (qr//)
 	code     - a subroutine reference
 
+    categories - an array reference of category names
+    tags       - an array reference of tags names
+
 This method first builds a query to search through the C<wp_posts>
 table.
 
 If you specify C<sql_like>, it limits the returned rows to those whose
 C<post_title> or C<post_content> match that argument.
+
+If you specify C<categories> or C<tags>, another query annotates the
+return rows with term information. If the C<categories> or C<tags> have
+values, the return rows are reduced to those that have those categories
+or tags. If you don't want to reduce the rows just yet, you can use C<code>
+to examine the row yourself.
 
 If you specify C<regex>, it filters the returned rows to those whose
 C<post_title> or C<post_content> satisfy the regular expression.
@@ -284,10 +297,10 @@ sub _check_args {
 			unless ref $self->_args->{code} eq ref sub {};
 		}
 
-	my @array_keys = qw( type include_columns exclude_columns );
+	my @array_keys = qw( type categories tags include_columns exclude_columns );
 	foreach my $array_arg ( @array_keys ) {
 		next unless exists $self->_args->{$array_arg};
-		croak "'array_arg' value must be an array reference"
+		croak "'$array_arg' value must be an array reference"
 			unless ref $self->_args->{$array_arg} eq ref [];
 		}
 
@@ -313,6 +326,101 @@ sub _get_posts {
 	$sth->execute( $self->_bind_params );
 
 	my $posts = $sth->fetchall_hashref( 'ID' );
+	
+	if( $self->_include_terms ) {
+		my @post_ids = keys %$posts;
+		my $terms = $self->_get_terms;
+
+		my %categories = map { $_, 1 } @{ $self->_args->{categories} };
+		my %tags       = map { $_, 1 } @{ $self->_args->{tags} };
+
+		# reduce the posts in 
+		foreach my $post_key ( @post_ids ) {
+			my $this = $terms->{$post_key};
+
+			my $found = 0;
+
+			# if none are specified, include all
+			$found = 1 if( 0 == keys %tags && 0 == keys %categories );
+
+			my %this_tags = 
+				map  { $this->{$_}{name}, $this->{$_}{term_taxonomy_id} }
+				grep { $this->{$_}{taxonomy} eq 'post_tag' }
+				keys %$this;
+
+			my %Seen_tags;
+			my @found_tags = grep { ++$Seen_tags{$_} > 1 } 
+				keys %this_tags, keys %tags;
+			$found += do {
+				if( $self->_args->{tags_and} ) { @found_tags == keys %tags }
+				else { scalar @found_tags }
+				};
+
+			my %this_categories = 
+				map  { $this->{$_}{name}, $this->{$_}{term_taxonomy_id} }
+				grep { $this->{$_}{taxonomy} eq 'category' }
+				keys %$this;
+			my %Seen_categories;
+			my @found_categories = grep { ++$Seen_categories{$_} > 1 } 
+				keys %this_categories, keys %categories;
+			$found += do {
+				if( $self->_args->{categories_and} ) { @found_categories == keys %categories }
+				else { scalar @found_categories }
+				};
+			
+			if( $found ) {
+				$posts->{$post_key}{terms}      = $terms->{$post_key};
+				$posts->{$post_key}{tags}       = [ keys %this_tags ];
+				$posts->{$post_key}{categories} = [ keys %this_categories ];
+				}
+			else {
+				delete $posts->{$post_key};
+				}
+
+			}
+		}
+
+	return $posts;
+	}
+
+sub _include_terms {
+	$_[0]->_args->{categories} or $_[0]->_args->{tags};
+	}
+
+sub _get_terms {
+	my( $self, $post_ids ) = @_;
+	
+	my $query =<<'SQL';
+SELECT 
+	wp_posts.ID, 
+	wp_posts.post_title, 
+	wp_terms.term_id, 
+	wp_terms.name, 
+	wp_term_taxonomy.term_taxonomy_id,  
+	wp_term_taxonomy.parent, 
+	wp_term_taxonomy.taxonomy
+FROM 
+	wp_posts
+LEFT JOIN 
+	wp_term_relationships ON wp_term_relationships.object_id = wp_posts.ID
+LEFT JOIN 
+	wp_term_taxonomy ON wp_term_taxonomy.term_taxonomy_id = wp_term_relationships.term_taxonomy_id
+LEFT JOIN 
+	wp_terms ON wp_terms.term_id = wp_term_taxonomy.term_id
+WHERE
+	wp_term_taxonomy.taxonomy IS NOT NULL
+SQL
+
+	my $sth = $self->db->prepare( $query );
+	croak
+		"Could not create statement handle\n\n" .
+		"DBI Error: $DBI::Error\n\n" .
+		"Statement-----\n$query\n-----\n"
+		unless defined $sth;
+
+	$sth->execute;
+
+	my $terms = $sth->fetchall_hashref( [ qw( ID term_id) ] );
 	}
 
 =back

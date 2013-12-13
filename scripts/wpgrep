@@ -3,23 +3,43 @@ use v5.16;
 use strict;
 use warnings;
 
+use vars qw($VERSION);
+$VERSION = '0.001';
+
 use Getopt::Long qw(GetOptions);
 use WordPress::Grep;
 
 binmode STDOUT, ':utf8';
 
 my(
-	$code, $database, $host, $like, $password, $port, $regex, $user,
+	$code, 
+	@categories,
+	$categories_and,
+	$database, 
+	$host, 
+	$like,
+	$password, 
+	$port, 
+	$regex, 
+	@tags,
+	$tags_and,
+	$template,
+	$user,
 	) = ();
 
 GetOptions (
 	"c|code=s"          => \$code,
+	"category:s@"       => \@categories,
+	"categories_and"    => \$categories_and,
 	"d|db|database=s"   => \$database,
 	"h|host=s"          => \$host,
 	"l|like=s"          => \$like,
 	"p|password=s"      => \$password,
 	"port=i"            => \$port,
 	"r|regex=s"         => \$regex,
+	"tag:s@"            => \@tags,
+	"tag_and"           => \$tags_and,
+	"template=s"        => \$template,
 	"u|user=s"          => \$user,
 	);
 
@@ -39,7 +59,8 @@ if( defined $code ) {
 
 my $regex_ref;
 if( defined $regex ) {
-	$regex_ref = eval { qr/$regex/ } or die "Regex [$regex] does not compile! $@\n";
+	$regex_ref = eval { qr/$regex/ } 
+		or die "Regex [$regex] does not compile! $@\n";
 	}
 
 my $wpgrep = WordPress::Grep->connect(
@@ -51,18 +72,116 @@ my $wpgrep = WordPress::Grep->connect(
 	);
 
 my $posts = $wpgrep->search(
-	defined $like  ? ( sql_like => $like )   : (),
-	defined $regex ? ( regex => $regex_ref ) : (),
-	defined $code  ? ( code => $code )       : (),
+	defined $like  ? ( sql_like => $like      ) : (),
+	defined $regex ? ( regex    => $regex_ref ) : (),
+	defined $code  ? ( code     => $code      ) : (),
+
+	@categories  ? ( categories => \@categories ) : (),
+	@tags        ? ( tags       => \@tags       ) : (),
+
+	defined $tags_and        ? ( tags_and       => $tags_and       ) : (),
+	defined $categories_and  ? ( categories_and => $categories_and ) : (),
 	);
 
 # eventually this will pop up some other form
 say "There are " . keys( %$posts ) . " posts";
 say "-" x 50 if keys( %$posts );
+
+$template //= '%4i %30t';
 foreach my $ID ( sort { $a <=> $b } keys %$posts ) {
-	printf "%4d %-30s %-50s\n",
-		@{$posts->{$ID}}{ qw(ID post_name post_title) };
+	my $string = format_it( $template, $posts->{$ID} );
+	say $string;
 	}
+
+sub make_handler {
+	my( $format, $field ) = @_;
+
+	sub {
+		my( $width, $post ) = @_;
+		sprintf "%${width}s", $post->{$field};
+		}
+	}
+
+BEGIN {
+my %simple_formats = qw(
+		i ID
+		a post_author
+		d post_date
+		g post_date_gmt
+		c post_content
+		t post_title
+		e post_excerpt
+		s post_status
+		S comment_status
+		P ping_status
+		A post_password
+		n post_name
+		z to_ping
+		Z pinged
+		D post_modified
+		G post_modified_gmt
+		f post_content_filtered
+		p post_parent
+		U guid
+		o menu_order
+		T post_type
+		m post_mime_type
+		C comment_count
+	);
+
+my %handlers = (
+	map { 
+		$_, make_handler( $_, $simple_formats{$_} ) 
+		} keys %simple_formats
+	);
+
+$handlers{k} = sub { 
+	my( $width, $post ) = @_;
+
+	sprintf "%${width}s", join ' ', @{ $post->{tags} };
+	};
+$handlers{K} = sub { 
+	my( $width, $post ) = @_;
+
+	sprintf "%${width}s", join ' ', @{ $post->{categories} };
+	};
+$handlers{R} = sub { 
+	my( $width, $post ) = @_;
+
+	"\n";
+	};
+
+sub get_handlers { \%handlers }
+}
+
+
+sub format_it {
+    my( $template, $post ) = @_;
+
+    state $pattern = qr/
+    	\%
+    	(?:
+    		(?<width> [+\-\d.]* ) 
+    		(?<field> [a-zA-Z]  )
+    	)
+    	/x;
+    my $string = $template =~ s<$pattern>{ do_it( $+{width}, $+{field}, $post ) }ger;
+	}
+
+sub do_it {
+	my( $width, $field, $post ) = @_;
+	state $handlers = get_handlers();
+
+    if( exists $handlers->{$field} ) {
+    	$handlers->{$field}->($width, $post);
+    	}
+    else {
+    	warn "Unknown field '$field'";
+    	'';
+    	}
+	}
+
+
 
 __END__
 
@@ -84,8 +203,16 @@ wpgrep - Search through a WordPress database directly
 	% wpgrep --host ... --user ... --code Some::Module::subroutine
 
 	# or combine them
-	% wpgrep --host ... --user ... --like '%Amelia%' --regex '\bAmelia(?!Foo)' --code Some::Module::subroutine
+	% wpgrep --host ... --user ... --like '%Amelia%' \
+		--regex '\bAmelia(?!Foo)' --code Some::Module::subroutine
 
+	# include the categories or tags
+	% wpgrep  ... --categories
+	% wpgrep  ... --tags
+
+	# specify a template for the results
+	% wpgrep ... --template '%T'
+	
 =head1 DESCRIPTION
 
 I wanted a tool for complex searches of WordPress posts in my
@@ -95,6 +222,14 @@ values.
 
 If you specify C<--like>, it limits the returned rows to those whose
 C<post_title> or C<post_content> match that argument.
+
+If you specify C<--categories> or C<--tags>, the returned rows are
+annotated with relationship information. The C<categories> and C<tags>
+keys have array reference values with lists of term names. The
+C<terms> keys is a hash with more term information. Dump it and
+inspect it if you want to play with it. Furthermore, the returned
+rows are reduced to the rows that have the specified categories if you
+give those options values.
 
 If you specify C<--regex>, it filters the returned rows to those whose
 C<post_title> or C<post_content> satisfy the regular expression.
@@ -122,6 +257,24 @@ you.
 
 Be careful! This allows someone to run any code they like (and that's
 the point)!
+
+=item * --category
+
+With no value, each returned row has category and tag information 
+added to it.
+
+With a category names, the returned rows
+are reduced to those having that category. No parent relationships
+are examined.
+
+You may specify this multiple times. Any row having any of the specified
+categories is returned. If you specify C<--categories_and>, each row
+must have all of the categories.
+
+=item * --categories_and
+
+If you specify C<--categories_and>, each row
+must have all of the categories.
 
 =item * -d, --db, --database
 
@@ -153,6 +306,26 @@ The MySQL port, if you aren't using the default.
 A Perl regex used to filter the results. The regex applies to the
 C<post_title> and C<post_content>.
 
+=item * --tags
+
+With no value, each returned row has category and tag information
+added to it.
+
+With a tag name, the returned rows are reduced to those having that
+tag.
+
+You may specify this multiple times. Any row having any of the
+specified tags is returned. If you specify C<--tags_and>, each row
+must have all of the categories.
+
+=item * --tags_and
+
+If you specify C<--tags_and>, each row must have all of the tags.
+
+=item * --template
+
+Specify the sprintf-style template to format the row.
+
 =item * -u, --user
 
 The MySQL user. You might want to set up a special read-only user for
@@ -160,6 +333,66 @@ this tool.
 
 =back
 
+=head2 Template
+
+Most template items map directly onto the columns from wp_posts.
+
+=over 4
+
+=item * %A post_password
+
+=item * %a post_author
+
+=item * %C comment_count
+
+=item * %c post_content
+
+=item * %D post_modified
+
+=item * %d post_date
+
+=item * %e post_excerpt
+
+=item * %f post_content_filtered
+
+=item * %G post_modified_gmt
+
+=item * %g post_date_gmt
+
+=item * %i ID
+
+=item * %K categories
+
+=item * %k tags
+
+=item * %m post_mime_type
+
+=item * %n post_name
+
+=item * %o menu_order
+
+=item * %P ping_status
+
+=item * %p post_parent
+
+=item * %R newline
+
+=item * %S comment_status
+
+=item * %s post_status
+
+=item * %T post_type
+
+=item * %t post_title
+
+=item * %U guid
+
+=item * %Z pinged
+
+=item * %z to_ping
+
+=back
+ 
 =head1 TO DO
 
 
