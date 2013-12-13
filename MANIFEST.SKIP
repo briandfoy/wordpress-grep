@@ -57,3 +57,5 @@
 ^MYMETA\.
 #!end included /usr/local/perls/perl-5.18.1/lib/5.18.1/ExtUtils/MANIFEST.SKIP
 
+
+^hacks/
