@@ -59,3 +59,5 @@
 
 
 ^hacks/
+\.releaserc
+columns.txt
