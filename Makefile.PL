@@ -1,6 +1,6 @@
 use ExtUtils::MakeMaker;
 
-require 5.016;
+require 5.014;
 
 print <<"HERE";
 THIS IS ALPHA SOFTWARE. IT MIGHT CHANGE.
