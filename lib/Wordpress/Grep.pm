@@ -10,7 +10,7 @@ use vars qw($VERSION);
 use Carp qw(croak);
 use DBI;
 
-$VERSION = '0.010_001';
+$VERSION = '0.010_002';
 
 =encoding utf8
 
