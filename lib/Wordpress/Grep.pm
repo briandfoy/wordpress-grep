@@ -60,7 +60,7 @@ I've long wanted this tool to examine consistency in my posts. I want
 to check my use of CSS and HTML across all posts to check what I may
 need to change when I change how I do things. This sort of thing is hard
 to do with existing tools and the WordPress API (although there is a
-L<WordPress::API>.
+L<WordPress::API>).
 
 I want to go through all posts with all the power of Perl, so my
 grep:
