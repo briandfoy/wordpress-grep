@@ -1,0 +1,29 @@
+use Getopt::Long qw(GetOptions);
+
+
+my(
+	$code, 
+	@categories, 
+	$database, 
+	$host, 
+	$like,
+	$password, 
+	$port, 
+	$regex, 
+	@tags, 
+	$user,
+	) = ();
+
+GetOptions (
+	"c|code=s"          => \$code,
+	"category=s@"       => \@categories,
+	"d|db|database=s"   => \$database,
+	"h|host=s"          => \$host,
+	"l|like=s"          => \$like,
+	"p|password=s"      => \$password,
+	"port=i"            => \$port,
+	"r|regex=s"         => \$regex,
+	"tag=s@"            => \@tags,
+	"u|user=s"          => \$user,
+	);
+	
