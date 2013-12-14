@@ -1,5 +1,8 @@
 # Changes for WordPress::Grep
 
+0.10_003 - Fri Dec 13 17:33:42 2013
+	* Fix case problem in directory name
+
 0.10_002 - Fri Dec 13 17:26:27 2013
 	* Filter by categories and tags
 	* Specify an output template
