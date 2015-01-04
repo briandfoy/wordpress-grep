@@ -1,4 +1,4 @@
-# Changes for WordPress::Grep
+Revision history for Perl module WordPress::Grep
 
 0.10_003 - Fri Dec 13 17:33:42 2013
 	* Fix case problem in directory name
