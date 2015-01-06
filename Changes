@@ -1,13 +1,13 @@
 Revision history for Perl module WordPress::Grep
 
-0.10_003 - Fri Dec 13 17:33:42 2013
+0.10_003 - 2013-12-13
 	* Fix case problem in directory name
 
-0.10_002 - Fri Dec 13 17:26:27 2013
+0.10_002 - 2013-12-13
 	* Filter by categories and tags
 	* Specify an output template
 	* --user now defaults to root
 
-0.10_001 - Thu Dec 12 12:52:37 2013
+0.10_001 - 2013-12-12
 	* The start of a tool to search a WordPress database
 
