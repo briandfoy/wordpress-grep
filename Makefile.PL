@@ -7,9 +7,8 @@ print <<"HERE";
 THIS IS ALPHA SOFTWARE. IT MIGHT CHANGE.
 HERE
 
-my $main_file = 'lib/WordPress/Grep.pm';
 my $github    = 'https://github.com/briandfoy/';
-my $main_file = 'lib/';
+my $main_file = 'lib/WordPress/Grep.pm';
 
 my %WriteMakefile = (
 	'NAME'	        => 'WordPress::Grep',
@@ -17,9 +16,19 @@ my %WriteMakefile = (
 	'VERSION_FROM'  => $main_file,
 	'LICENSE'       => 'perl',
 	'AUTHOR'        => 'brian d foy <bdfoy@cpan.org>',
+
+	'CONFIGURE_REQUIRES' => {
+		'ExtUtils::MakeMaker' => '6.64',
+		},
+
+	'BUILD_REQUIRES' => {
+		},
+
+	'TEST_REQUIRES' => {
+		'Test::More' => '0.95',
+		},
 	
 	'PREREQ_PM'    => { 
-		'Test::More' => '0.95',
 		'DBI'        => '0',
 		'DBD::mysql' => '0',
 		'Carp'       => '0',
