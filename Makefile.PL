@@ -54,7 +54,7 @@ my %WriteMakefile = (
 			},
 		},
 
-	clean  => { FILES    => q|WordPress-Grep-*| },
+	clean => { FILES => "$dist-*" },
 	);
 
 sub arguments { \%WriteMakefile }
