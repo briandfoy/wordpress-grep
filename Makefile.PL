@@ -9,6 +9,8 @@ HERE
 use File::Spec::Functions qw(catfile);
 
 my $module    = 'WordPress::Grep';
+( my $dist = $module ) =~ s/::/-/g;
+
 my $github    = 'https://github.com/briandfoy/Wordpress-Grep';
 my $main_file = catfile( 'lib', split /::/, "$module.pm" );
 
