@@ -1,4 +1,6 @@
 require 5.014;
+
+package WordPress::Grep;
 use strict;
 use warnings;
 
@@ -8,7 +10,7 @@ HERE
 
 use File::Spec::Functions qw(catfile);
 
-my $module    = 'WordPress::Grep';
+my $module    = __PACKAGE__;
 ( my $dist = $module ) =~ s/::/-/g;
 
 my $github    = 'https://github.com/briandfoy/Wordpress-Grep';
