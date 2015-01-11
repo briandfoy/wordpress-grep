@@ -1,0 +1,15 @@
+.travis.yml
+Changes
+examples/placeholder.pl
+lib/WordPress/Grep.pm
+LICENSE
+Makefile.PL
+MANIFEST			This list of files
+MANIFEST.SKIP
+README.pod
+scripts/wpgrep
+t/load.t
+t/pod.t
+t/pod_coverage.t
+t/test_manifest
+xt/changes.t
