@@ -1,6 +1,7 @@
 .travis.yml
 Changes
 examples/placeholder.pl
+INSTALL.SKIP
 lib/WordPress/Grep.pm
 LICENSE
 Makefile.PL
