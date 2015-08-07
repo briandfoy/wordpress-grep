@@ -61,3 +61,4 @@
 ^hacks/
 \.releaserc
 columns.txt
+\.travis\.yml
