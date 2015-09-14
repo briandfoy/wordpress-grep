@@ -43,6 +43,10 @@ GetOptions (
 	"u|user=s"          => \$user,
 	);
 
+unless( defined $database ) {
+	die "You must specify a database!\n";
+	}
+
 if( defined $code ) {
 	my( $package, $subroutine ) = $code =~ m/(.*)::(.*)/;
 	die "Illegal package name [$package]\n"
