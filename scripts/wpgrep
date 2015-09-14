@@ -12,15 +12,15 @@ use WordPress::Grep;
 binmode STDOUT, ':utf8';
 
 my(
-	$code, 
+	$code,
 	@categories,
 	$categories_and,
-	$database, 
-	$host, 
+	$database,
+	$host,
 	$like,
-	$password, 
-	$port, 
-	$regex, 
+	$password,
+	$port,
+	$regex,
 	@tags,
 	$tags_and,
 	$template,
@@ -63,7 +63,7 @@ if( defined $code ) {
 
 my $regex_ref;
 if( defined $regex ) {
-	$regex_ref = eval { qr/$regex/ } 
+	$regex_ref = eval { qr/$regex/ }
 		or die "Regex [$regex] does not compile! $@\n";
 	}
 
@@ -134,22 +134,22 @@ my %simple_formats = qw(
 	);
 
 my %handlers = (
-	map { 
-		$_, make_handler( $_, $simple_formats{$_} ) 
+	map {
+		$_, make_handler( $_, $simple_formats{$_} )
 		} keys %simple_formats
 	);
 
-$handlers{k} = sub { 
+$handlers{k} = sub {
 	my( $width, $post ) = @_;
 
 	sprintf "%${width}s", join ' ', @{ $post->{tags} };
 	};
-$handlers{K} = sub { 
+$handlers{K} = sub {
 	my( $width, $post ) = @_;
 
 	sprintf "%${width}s", join ' ', @{ $post->{categories} };
 	};
-$handlers{R} = sub { 
+$handlers{R} = sub {
 	my( $width, $post ) = @_;
 
 	"\n";
@@ -165,7 +165,7 @@ sub format_it {
     state $pattern = qr/
     	\%
     	(?:
-    		(?<width> [+\-\d.]* ) 
+    		(?<width> [+\-\d.]* )
     		(?<field> [a-zA-Z]  )
     	)
     	/x;
@@ -216,7 +216,7 @@ wpgrep - Search through a WordPress database directly
 
 	# specify a template for the results
 	% wpgrep ... --template '%T'
-	
+
 =head1 DESCRIPTION
 
 I wanted a tool for complex searches of WordPress posts in my
@@ -264,7 +264,7 @@ the point)!
 
 =item * --category
 
-With no value, each returned row has category and tag information 
+With no value, each returned row has category and tag information
 added to it.
 
 With a category names, the returned rows
@@ -396,7 +396,7 @@ Most template items map directly onto the columns from wp_posts.
 =item * %z to_ping
 
 =back
- 
+
 =head1 TO DO
 
 
