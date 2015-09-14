@@ -2,6 +2,15 @@
 
 =encoding utf8
 
+=for HTML <a href="https://travis-ci.org/briandfoy/wordpress-grep"><img src="https://travis-ci.org/briandfoy/wordpress-grep.svg?branch=master"></a>
+
+=for HTML
+<a href='https://coveralls.io/github/briandfoy/wordpress-grep?branch=master'><img src='https://coveralls.io/repos/briandfoy/wordpress-grep/badge.svg?branch=master&service=github' alt='Coverage Status' /></a>
+
+=for HTML <a href="https://github.com/briandfoy/wordpress-grep/blob/master/LICENSE"><img src="https://img.shields.io/cpan/l/WordPress-Grep.svg" /></a>
+
+=for HTML <a href="http://www.metacpan.org/module/WordPress::Grep"><img src="https://img.shields.io/cpan/v/WordPress-Grep.svg" /></A>
+
 =head1 The WordPress::Grep module
 
 This is the I<README> for the L<WordPress::Grep> Perl module. You're probably 
