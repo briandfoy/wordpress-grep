@@ -59,6 +59,9 @@
 
 
 ^hacks/
+\.travis\.yml
+\.?appveyor.yml
 \.releaserc
+\.lwpcookies
 columns.txt
 \.travis\.yml
