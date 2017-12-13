@@ -326,7 +326,7 @@ sub _get_posts {
 	$sth->execute( $self->_bind_params );
 
 	my $posts = $sth->fetchall_hashref( 'ID' );
-	
+
 	if( $self->_include_terms ) {
 		my @post_ids = keys %$posts;
 		my $terms = $self->_get_terms;
@@ -334,7 +334,7 @@ sub _get_posts {
 		my %categories = map { $_, 1 } @{ $self->_args->{categories} };
 		my %tags       = map { $_, 1 } @{ $self->_args->{tags} };
 
-		# reduce the posts in 
+		# reduce the posts in
 		foreach my $post_key ( @post_ids ) {
 			my $this = $terms->{$post_key};
 
@@ -343,31 +343,31 @@ sub _get_posts {
 			# if none are specified, include all
 			$found = 1 if( 0 == keys %tags && 0 == keys %categories );
 
-			my %this_tags = 
+			my %this_tags =
 				map  { $this->{$_}{name}, $this->{$_}{term_taxonomy_id} }
 				grep { $this->{$_}{taxonomy} eq 'post_tag' }
 				keys %$this;
 
 			my %Seen_tags;
-			my @found_tags = grep { ++$Seen_tags{$_} > 1 } 
+			my @found_tags = grep { ++$Seen_tags{$_} > 1 }
 				keys %this_tags, keys %tags;
 			$found += do {
 				if( $self->_args->{tags_and} ) { @found_tags == keys %tags }
 				else { scalar @found_tags }
 				};
 
-			my %this_categories = 
+			my %this_categories =
 				map  { $this->{$_}{name}, $this->{$_}{term_taxonomy_id} }
 				grep { $this->{$_}{taxonomy} eq 'category' }
 				keys %$this;
 			my %Seen_categories;
-			my @found_categories = grep { ++$Seen_categories{$_} > 1 } 
+			my @found_categories = grep { ++$Seen_categories{$_} > 1 }
 				keys %this_categories, keys %categories;
 			$found += do {
 				if( $self->_args->{categories_and} ) { @found_categories == keys %categories }
 				else { scalar @found_categories }
 				};
-			
+
 			if( $found ) {
 				$posts->{$post_key}{terms}      = $terms->{$post_key};
 				$posts->{$post_key}{tags}       = [ keys %this_tags ];
@@ -389,23 +389,23 @@ sub _include_terms {
 
 sub _get_terms {
 	my( $self, $post_ids ) = @_;
-	
+
 	my $query =<<'SQL';
-SELECT 
-	wp_posts.ID, 
-	wp_posts.post_title, 
-	wp_terms.term_id, 
-	wp_terms.name, 
-	wp_term_taxonomy.term_taxonomy_id,  
-	wp_term_taxonomy.parent, 
+SELECT
+	wp_posts.ID,
+	wp_posts.post_title,
+	wp_terms.term_id,
+	wp_terms.name,
+	wp_term_taxonomy.term_taxonomy_id,
+	wp_term_taxonomy.parent,
 	wp_term_taxonomy.taxonomy
-FROM 
+FROM
 	wp_posts
-LEFT JOIN 
+LEFT JOIN
 	wp_term_relationships ON wp_term_relationships.object_id = wp_posts.ID
-LEFT JOIN 
+LEFT JOIN
 	wp_term_taxonomy ON wp_term_taxonomy.term_taxonomy_id = wp_term_relationships.term_taxonomy_id
-LEFT JOIN 
+LEFT JOIN
 	wp_terms ON wp_terms.term_id = wp_term_taxonomy.term_id
 WHERE
 	wp_term_taxonomy.taxonomy IS NOT NULL
@@ -446,7 +446,7 @@ brian d foy, C<< <bdfoy@gmail.com> >>
 
 Copyright © 2013-2015, brian d foy <bdfoy@cpan.org>. All rights reserved.
 
-You may redistribute this under the same terms as Perl itself.
+You may redistribute this under the Artistic License 2.0.
 
 =cut
 
