@@ -1,5 +1,9 @@
 Revision history for Perl module WordPress::Grep
 
+0.010_004 2018-01-04T07:04:53Z
+	* New year, new dev version
+	* Clarify that it's Artistic 2
+
 0.10_003 - 2013-12-13
 	* Fix case problem in directory name
 
