@@ -9,7 +9,7 @@
 
 =for HTML <a href="https://github.com/briandfoy/wordpress-grep/blob/master/LICENSE"><img src="https://img.shields.io/cpan/l/WordPress-Grep.svg" /></a>
 
-=for HTML <a href="http://www.metacpan.org/module/WordPress::Grep"><img src="https://img.shields.io/cpan/v/WordPress-Grep.svg" /></A>
+=for HTML <a href="https://metacpan.org/pod/WordPress::Grep"><img src="https://img.shields.io/cpan/v/WordPress-Grep.svg" /></A>
 
 =head1 The WordPress::Grep module
 
@@ -25,7 +25,7 @@ to read one again for any Perl module.
 
 To read about L<WordPress::Grep>, look at the embedded documentation
 in the module itself. Inside the distribution, you can format it
-with L<perldoc|http://perldoc.perl.org/perldoc.html>:
+with L<perldoc|https://perldoc.perl.orgperldoc.html>:
 
 	% perldoc lib/WordPress/Grep.pm
 
@@ -35,7 +35,7 @@ name instead of the file location:
 	% perldoc WordPress::Grep
 
 You can read the documentation and inspect the meta data at
-L<MetaCPAN|http://www.metacpan.org/module/WordPress::Grep>.
+L<MetaCPAN|https://metacpan.org/pod/WordPress::Grep>.
 
 The standard module documentation has example uses in the SYNOPSIS
 section, but you can also look in the I<examples/> directory (if it's
