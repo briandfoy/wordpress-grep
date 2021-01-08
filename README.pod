@@ -2,8 +2,6 @@
 
 =encoding utf8
 
-=for HTML <a href="https://travis-ci.org/briandfoy/wordpress-grep"><img src="https://travis-ci.org/briandfoy/wordpress-grep.svg?branch=master"></a>
-
 =for HTML
 <a href='https://coveralls.io/github/briandfoy/wordpress-grep?branch=master'><img src='https://coveralls.io/repos/briandfoy/wordpress-grep/badge.svg?branch=master&service=github' alt='Coverage Status' /></a>
 
