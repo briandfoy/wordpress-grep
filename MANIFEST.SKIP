@@ -59,12 +59,10 @@
 
 
 ^hacks/
-\.travis\.yml
 \.?appveyor.yml
 \.releaserc
 \.lwpcookies
 columns.txt
-\.travis\.yml
 \bMANIFEST\s\d
 \bChanges\s\d
 \.icloud$
