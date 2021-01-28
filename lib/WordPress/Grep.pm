@@ -4,7 +4,6 @@ use strict;
 use warnings;
 
 use utf8;
-use subs qw();
 
 use Carp qw(croak);
 use DBI;
