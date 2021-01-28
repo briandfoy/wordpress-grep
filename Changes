@@ -1,5 +1,8 @@
 Revision history for Perl module WordPress::Grep
 
+0.010_005 2021-01-28T21:42:03Z
+	* Freshen distro, remove Travis CI, add Github Actions
+
 0.010_004 2018-01-04T07:04:53Z
 	* New year, new dev version
 	* Clarify that it's Artistic 2
