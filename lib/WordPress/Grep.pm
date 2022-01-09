@@ -8,7 +8,7 @@ use utf8;
 use Carp qw(croak);
 use DBI;
 
-our $VERSION = '0.010_005';
+our $VERSION = '0.010_006';
 
 =encoding utf8
 
