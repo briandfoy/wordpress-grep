@@ -2,3 +2,4 @@
 *.t linguist-language=Perl
 *.pl linguist-language=Perl
 *.pm linguist-language=Perl
+*.pod linguist-language=Perl
