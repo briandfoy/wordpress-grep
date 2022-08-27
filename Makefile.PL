@@ -35,7 +35,7 @@ Perl.
 
 =cut
 
-print <<"HERE";
+print <<"HERE" unless caller();
 THIS IS ALPHA SOFTWARE. IT MIGHT CHANGE.
 HERE
 
