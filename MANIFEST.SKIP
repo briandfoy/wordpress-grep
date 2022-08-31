@@ -68,3 +68,4 @@ columns.txt
 \.icloud$
 \A\.github\b
 
+\.gitattributes\b
