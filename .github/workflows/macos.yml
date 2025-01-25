@@ -91,8 +91,8 @@ jobs:
             - name: Prepare cpan
               run: |
                 openssl version
-                cpan -M https://www.cpan.org -T DBD::mysql App::cpanminus IO::Socket::SSL HTTP::Tiny ExtUtils::MakeMaker Test::Manifest ${{ vars.EXTRA_CPAN_MODULES }}
-                cpanm --notest Test::Manifest  ${{ vars.EXTRA_CPANM_MODULES }}
+                cpan -M https://www.cpan.org -T App::cpanminus IO::Socket::SSL HTTP::Tiny ExtUtils::MakeMaker Test::Manifest ${{ vars.EXTRA_CPAN_MODULES }}
+                cpanm --notest Test::Manifest
 # Install the dependencies, again not testing them. This installs the
 # module in the current directory, so we end up installing the module,
 # but that's not a big deal.
