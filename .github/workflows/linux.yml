@@ -130,7 +130,7 @@ jobs:
               run: |
                 apt-get update
                 apt-get -y install libdbd-mysql-perl default-libmysqlclient-dev
-                cpan -D DBD::mysql
+                cpan DBD::mysql
             - name: Install dependencies
               run: |
                 cpanm --notest --installdeps --with-suggests --with-recommends . ${{ vars.EXTRA_CPAN_MODULES }}
