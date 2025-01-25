@@ -128,7 +128,8 @@ jobs:
 # but that's not a big deal.
             - name: Install DBD::mysql
               run: |
-                apt-get install libdbd-mysql-perl
+                apt-get update
+                apt-get -y install libdbd-mysql-perl
             - name: Install dependencies
               run: |
                 cpanm --notest --installdeps --with-suggests --with-recommends . ${{ vars.EXTRA_CPAN_MODULES }}
