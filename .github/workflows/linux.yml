@@ -128,9 +128,7 @@ jobs:
 # but that's not a big deal.
             - name: Install DBD::mysql
               run: |
-                apt-get update
-                apt-get -y install libdbd-mysql-perl default-libmysqlclient-dev
-                cpan DBD::mysql
+                cpanm DBD::mysql@4.050
             - name: Install dependencies
               run: |
                 cpanm --notest --installdeps --with-suggests --with-recommends . ${{ vars.EXTRA_CPAN_MODULES }}
