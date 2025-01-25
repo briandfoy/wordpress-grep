@@ -8,13 +8,6 @@
 # in your repo settings. Or not. It still works if it isn't defined.
 # In that environment, add whatever environment variables or secrets
 # that you want.
-#
-# Variables that you can set in the "automated_testing" environment:
-#
-# EXTRA_CPANM_MODULES - extra arguments to the first call to cpanm.
-#                       this is useful to install very particular
-#                       modules, such as DBD::mysql@4.050
-
 ---
 name: ubuntu
 
@@ -59,7 +52,7 @@ on:
     pull_request:
     # weekly build on the master branch just to see what CPAN is doing
     schedule:
-        - cron: "49 23 * * 2"
+        - cron: "37 3 * * 0"
 jobs:
     perl:
         environment: automated_testing
@@ -129,13 +122,13 @@ jobs:
             - name: Install cpanm and multiple modules
               run: |
                 curl -L https://cpanmin.us | perl - App::cpanminus
-                cpanm --notest IO::Socket::SSL LWP::Protocol::https App::Cpan HTTP::Tiny ExtUtils::MakeMaker Test::Manifest Test::More ${{ vars.EXTRA_CPANM_MODULES }}
+                cpanm --notest IO::Socket::SSL LWP::Protocol::https App::Cpan HTTP::Tiny ExtUtils::MakeMaker Test::Manifest Test::More
 # Install the dependencies, again not testing them. This installs the
 # module in the current directory, so we end up installing the module,
 # but that's not a big deal.
             - name: Install dependencies
               run: |
-                cpanm --notest --installdeps --with-suggests --with-recommends .
+                cpanm --notest --installdeps --with-suggests --with-recommends . ${{ vars.EXTRA_CPAN_MODULES }}
             - name: Show cpanm failures
               if: ${{ failure() }}
               run: |
