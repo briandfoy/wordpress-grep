@@ -1,5 +1,5 @@
 # brian's standard GitHub Actions Ubuntu config for Perl 5 modules
-# version 20250101.001
+# version 20250617.003
 # https://github.com/briandfoy/github_workflows
 # https://github.com/features/actions
 # This file is licensed under the Artistic License 2.0
@@ -8,6 +8,24 @@
 # in your repo settings. Or not. It still works if it isn't defined.
 # In that environment, add whatever environment variables or secrets
 # that you want.
+#
+# Variables that you can set in the "automated_testing" environment:
+#
+# EXTRA_CPAN_MODULES  - extra arguments to the first call to cpan.
+#                       Just use EXTRA_CPANM_MODULES though. This is
+#                       here for legacy
+#
+# EXTRA_CPANM_MODULES - extra arguments to the first call to cpanm.
+#                       this is useful to install very particular
+#                       modules, such as DBD::mysql@4.050
+#
+# UBUNTU_EXTRA_APT_GET - extra packages to install before we start
+#
+# UBUNTU_EXTRA_CPANM_MODULES - extra arguments to the first call to cpanm
+#                       but only on Ubuntu. Other workflows won't use this.
+#                       this is useful to install very particular
+#                       modules, such as DBD::mysql@4.050
+
 ---
 name: ubuntu
 
@@ -52,7 +70,7 @@ on:
     pull_request:
     # weekly build on the master branch just to see what CPAN is doing
     schedule:
-        - cron: "49 23 * * 2"
+        - cron: "52 10 * * 5"
 jobs:
     perl:
         environment: automated_testing
@@ -60,7 +78,7 @@ jobs:
         strategy:
             matrix:
                 os:
-                    - ubuntu-22.04
+                    - ubuntu-latest
                 perl-version:
                     - '5.14-buster'
                     - '5.16-buster'
@@ -80,15 +98,34 @@ jobs:
             image: perl:${{ matrix.perl-version }}
         steps:
             - uses: actions/checkout@v3
+            - name: git corrections
+              run: |
+                git config --global --add safe.directory "$(pwd)"
             - name: Platform check
               run: uname -a
+            - name: setup platform
+              run: |
+                apt-get -y update
+                apt-get -y upgrade
+                apt-get -y install \
+                    curl \
+                    jq \
+                    ${{ vars.UBUNTU_EXTRA_APT_GET }}
+
+                curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg --output /usr/share/keyrings/githubcli-archive-keyring.gpg
+                chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+                echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+                apt update
+                apt-get -y install gh
+
+                git config --global --add safe.directory $(pwd)
             - name: Perl version check
               run: |
                 perl -V
                 perl -v | perl -0777 -ne 'm/(v5\.\d+)/ && print "PERL_VERSION=$1"' >> $GITHUB_ENV
 # Some older versions of Perl have trouble with hostnames in certs. I
 # haven't figured out why.
-            - name: Setup environment
+            - name: enhance environment
               run: |
                 echo "PERL_LWP_SSL_VERIFY_HOSTNAME=0" >> $GITHUB_ENV
 # HTML::Tagset bumped its minimum version to v5.10 for no good reason
@@ -103,17 +140,43 @@ jobs:
             - name: fix html-tagset for v5.8
               if: env.PERL_VERSION == 'v5.8'
               run: |
+                cpan App::Cpan
                 curl -L -O https://cpan.metacpan.org/authors/id/P/PE/PETDANCE/HTML-Tagset-3.24.tar.gz
                 tar -xzf HTML-Tagset-3.24.tar.gz
                 cd HTML-Tagset-3.24
                 rm META.*
                 mv Makefile.PL Makefile.PL.orig
                 perl -n -e 'next if /(^use 5)|(MIN_PERL)/; print' Makefile.PL.orig > Makefile.PL
-                cpan -T .
+                cpan -M http://www.cpan.org -T .
                 cd ..
                 pwd
                 ls
                 rm -rfv HTML-Tagset-*
+# Restore the last module installation for this OS/perl combination. This
+# saves several minutes in some cases. When cpan installs updates, the
+# 'save' counterpart for 'restore' will update the cache.
+            - name: Restore Perl modules
+              id: perl-modules-cache-restore
+              uses: actions/cache/restore@v4
+              with:
+                key: ${{ runner.os }}-${{ matrix.perl-version }}-modules
+                path: |
+                  /usr/local/lib/perl5
+                  /usr/local/bin/cover
+                  /usr/local/bin/cpan
+# We cannot reuse cache keys, so we'll delete it and then save it again
+# There are various hacks for this, but GitHub has so far declined to
+# do what so many people want. This seems like a long way to go to do
+# this, but most of the problem is translating the unique cache key name
+# to another hidden ID value. This is pervasive in the GitHub API.
+            - name: Delete cache
+              id: delete-cache
+              env:
+                GH_TOKEN: ${{ github.token }}
+              run: |
+                gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/${{ github.repository }}/actions/caches \
+                  | jq -r '.actions_caches[] | select(.key == "${{ steps.perl-modules-cache-restore.outputs.cache-primary-key }}") | .id' \
+                  | xargs -I{} gh api --method DELETE -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/${{ github.repository }}/actions/caches/{}
 # I had some problems with openssl on Ubuntu, so I punted by installing
 # cpanm first, which is easy. I can install IO::Socket::SSL with that,
 # then switch back to cpan. I didn't explore this further, but what you
@@ -122,13 +185,14 @@ jobs:
             - name: Install cpanm and multiple modules
               run: |
                 curl -L https://cpanmin.us | perl - App::cpanminus
-                cpanm --notest IO::Socket::SSL LWP::Protocol::https App::Cpan HTTP::Tiny ExtUtils::MakeMaker Test::Manifest Test::More
+                cpanm --notest IO::Socket::SSL LWP::Protocol::https App::Cpan HTTP::Tiny ExtUtils::MakeMaker Test::Manifest Test::More ${{ vars.EXTRA_CPANM_MODULES }} ${{ vars.UBUNTU_EXTRA_CPANM_MODULES }}
+                cpan -M http://www.cpan.org -T Test::Manifest ${{ vars.EXTRA_CPAN_MODULES }}
 # Install the dependencies, again not testing them. This installs the
 # module in the current directory, so we end up installing the module,
 # but that's not a big deal.
             - name: Install dependencies
               run: |
-                cpanm --notest --installdeps --with-suggests --with-recommends . ${{ vars.EXTRA_CPAN_MODULES }}
+                cpanm --notest --installdeps --with-suggests --with-recommends .
             - name: Show cpanm failures
               if: ${{ failure() }}
               run: |
@@ -167,9 +231,21 @@ jobs:
 # Devel::Cover 1.39
             - name: Run coverage tests
               if: env.PERL_VERSION != 'v5.8' && env.PERL_VERSION != 'v5.10'
+              continue-on-error: true
               env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                 cpanm --notest Devel::Cover Devel::Cover::Report::Coveralls
                 perl Makefile.PL
-                cover -test -report coveralls
+                cover -test +ignore 'Makefile.PL' -report coveralls
+# Now always save the Perl modules in case we updated some versions
+            - name: Save Perl modules
+              id: perl-modules-cache-save
+              uses: actions/cache/save@v4
+              if: always()
+              with:
+                key: ${{ steps.perl-modules-cache-restore.outputs.cache-primary-key }}
+                path: |
+                  /usr/local/lib/perl5
+                  /usr/local/bin/cover
+                  /usr/local/bin/cpan
